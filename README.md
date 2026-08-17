@@ -110,6 +110,10 @@ curl -X POST http://localhost:3000/render \
   -H "Content-Type: application/json" \
   -H "X-API-Key: demo-key-change-me" \
   -d '{"smiles": "CC(=O)OC1=CC=CC=C1C(=O)O"}'
+
+curl -X POST http://localhost:3000/molecules/batch \
+  -H "X-API-Key: demo-key-change-me" \
+  -F "file=@molecules.csv" -F "format=csv"
 ```
 
 ## Predicting drug-likeness (QSAR demo)
@@ -126,6 +130,19 @@ molecules built from a public solubility dataset plus synthetic combinations add
 the drug-like/non-drug-like classes — see `chem-python/data/README.md` and the docstring at the
 top of `train.py` for exactly how and why. Nothing here needs the internet at build time; the
 dataset is checked into the repo.
+
+## Bulk import (ETL)
+
+`POST /molecules/batch` is a small extract/transform/load pipeline: **extract**
+molecules from an uploaded SDF or CSV/SMILES-per-line file (`chem-python`'s
+`app/batch.py`, using RDKit's `ForwardSDMolSupplier` for SDF), **transform**
+each one through the same descriptor calculation `/analyze` uses, **load**
+every valid row into Postgres with the same upsert-by-InChIKey behavior as
+adding one molecule by hand. A malformed row (bad SMILES, an unparseable SDF
+block) fails only that row — the response reports per-row success/failure
+instead of rejecting the whole batch, capped at 500 rows / 10MB. This is the
+realistic version of "adding a molecule": in practice a chemist has a file of
+hundreds of compounds, not one SMILES typed into a form.
 
 ## Visualizations
 
@@ -147,4 +164,5 @@ Phases 1-4 (store/read molecules, drug-likeness filter, substructure search,
 similarity search) are implemented end to end, plus a React/Ant Design frontend,
 API-key auth, an audit trail (`audit_log` table, `GET /audit`), a small
 drug-likeness classifier (`POST /predict/druglike`), 2D structure rendering
-(`POST /render`), and a chemical-space dashboard.
+(`POST /render`), a chemical-space dashboard, and a bulk SDF/CSV import
+pipeline (`POST /molecules/batch`).

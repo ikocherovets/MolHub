@@ -19,7 +19,11 @@ Five tabs, each a thin wrapper around one part of the API:
 - **Molecules** — add a molecule by its SMILES string (MW, LogP, TPSA, H-bond
   donors/acceptors, ring count and Lipinski drug-likeness are computed
   server-side), list stored molecules, optionally filtered to drug-like only.
-  Each row shows a rendered 2D structure, not just the raw SMILES.
+  Each row shows a rendered 2D structure, not just the raw SMILES. Also has a
+  **batch import** section — upload an SDF or CSV/SMILES file (`POST
+  /molecules/batch`) and get a per-row success/failure summary back; see
+  [Bulk import (ETL)](../README.md#bulk-import-etl) for how the pipeline
+  works.
 - **Substructure search** — find stored molecules that contain a given SMARTS
   pattern (e.g. `c1ccccc1` for a benzene ring).
 - **Similarity search** — rank stored molecules by Tanimoto similarity
@@ -58,10 +62,11 @@ npm run dev
 ```
 
 This starts a Vite dev server at `http://localhost:5173` that proxies
-`/molecules`, `/search`, `/predict`, `/render`, `/health` and `/docs` to
-`http://localhost:3000` (configurable via `VITE_API_PROXY_TARGET`), so the
-`api-gateway` container (or a local `npm run start:dev` in `../api-gateway`)
-needs to be running separately.
+`/molecules` (including its `/molecules/batch` sub-route), `/search`,
+`/predict`, `/render`, `/health` and `/docs` to `http://localhost:3000`
+(configurable via `VITE_API_PROXY_TARGET`), so the `api-gateway` container
+(or a local `npm run start:dev` in `../api-gateway`) needs to be running
+separately.
 
 Other scripts:
 
@@ -80,6 +85,7 @@ src/
   App.tsx                   layout + tabs
   components/
     MoleculesPanel.tsx       add + list molecules
+    BatchImportSection.tsx   SDF/CSV bulk import, per-row results
     SubstructurePanel.tsx    SMARTS substructure search
     SimilarityPanel.tsx      Tanimoto similarity search
     PredictPanel.tsx         ML drug-likeness prediction
