@@ -1,7 +1,10 @@
 # MolHub — Molecular Screening Platform
 
-Backend platform for storing, searching and analyzing molecules — cheminformatics
-inside a real service-oriented architecture.
+A full-stack cheminformatics platform: store molecules by SMILES, search them by
+drug-likeness, SMARTS substructure or Tanimoto similarity, and predict Lipinski
+drug-likeness with a small ML model — all behind a service-oriented backend
+(NestJS + Go + FastAPI/RDKit + PostgreSQL/RDKit-cartridge) and a React UI, running
+as one Docker Compose stack.
 
 ## Stack
 
@@ -30,7 +33,9 @@ docker compose up --build
 ```
 
 - **frontend: http://localhost:5173** — the UI. It ships with the demo API key
-  (`demo-key-change-me`) already filled in, so it works out of the box.
+  (`demo-key-change-me`) already filled in, so it works out of the box. Every
+  tab has clickable "Try:" example chips (aspirin, caffeine, ibuprofen, ...) so
+  you don't need to know SMILES/SMARTS syntax to explore it.
 - api-gateway: http://localhost:3000 (Swagger at `/docs`)
 - chem-service: http://localhost:8080
 - chem-python: http://localhost:8000

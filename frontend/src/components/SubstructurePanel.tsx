@@ -3,11 +3,19 @@ import { SearchOutlined } from '@ant-design/icons';
 import { Alert, Button, Card, Form, Input, Typography } from 'antd';
 import { ApiError, searchSubstructure } from '../api';
 import type { Molecule } from '../types';
+import { ExampleChips } from './ExampleChips';
 import { MoleculeTable } from './MoleculeTable';
 
 const { Paragraph, Text } = Typography;
 
+const EXAMPLES = [
+  { label: 'Benzene ring', value: 'c1ccccc1' },
+  { label: 'Pyridine ring', value: 'c1ccncc1' },
+  { label: 'Carboxylic acid', value: 'C(=O)O' },
+];
+
 export function SubstructurePanel() {
+  const [form] = Form.useForm<{ smarts: string }>();
   const [results, setResults] = useState<Molecule[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -32,7 +40,7 @@ export function SubstructurePanel() {
       <Paragraph type="secondary">
         Find molecules containing a SMARTS pattern, e.g. <Text code>c1ccccc1</Text> (benzene ring).
       </Paragraph>
-      <Form layout="inline" onFinish={onSearch} style={{ marginBottom: 16 }}>
+      <Form form={form} layout="inline" onFinish={onSearch} style={{ marginBottom: 16 }}>
         <Form.Item name="smarts" rules={[{ required: true, message: 'Enter a SMARTS pattern' }]} style={{ flex: 1, minWidth: 260 }}>
           <Input placeholder="SMARTS, e.g. c1ccccc1" />
         </Form.Item>
@@ -42,6 +50,8 @@ export function SubstructurePanel() {
           </Button>
         </Form.Item>
       </Form>
+
+      <ExampleChips examples={EXAMPLES} onSelect={(value) => form.setFieldsValue({ smarts: value })} />
 
       {error && <Alert type="error" message={error} closable onClose={() => setError(null)} style={{ marginBottom: 16 }} />}
 

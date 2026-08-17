@@ -3,14 +3,24 @@ import { ExperimentOutlined } from '@ant-design/icons';
 import { Alert, Button, Card, Descriptions, Form, Input, Progress, Tag, Typography } from 'antd';
 import { ApiError, predictDruglike } from '../api';
 import type { DruglikePrediction } from '../types';
+import { ExampleChips } from './ExampleChips';
 
 const { Paragraph, Text } = Typography;
+
+const ASPIRIN = 'CC(=O)OC1=CC=CC=C1C(=O)O';
+
+const EXAMPLES = [
+  { label: 'Aspirin (drug-like)', value: ASPIRIN },
+  { label: 'Ibuprofen (drug-like)', value: 'CC(C)Cc1ccc(cc1)C(C)C(=O)O' },
+  { label: '4x Aspirin (violates rule)', value: [ASPIRIN, ASPIRIN, ASPIRIN, ASPIRIN].join('.') },
+];
 
 function druglikeTag(value: boolean) {
   return value ? <Tag color="green">drug-like</Tag> : <Tag color="red">not drug-like</Tag>;
 }
 
 export function PredictPanel() {
+  const [form] = Form.useForm<{ smiles: string }>();
   const [result, setResult] = useState<DruglikePrediction | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -38,7 +48,7 @@ export function PredictPanel() {
         prediction out. Shown next to the deterministic rule-based value from the Molecules tab,
         so you can see where the model agrees or disagrees with the rule it's approximating.
       </Paragraph>
-      <Form layout="inline" onFinish={onSubmit} style={{ marginBottom: 16 }}>
+      <Form form={form} layout="inline" onFinish={onSubmit} style={{ marginBottom: 16 }}>
         <Form.Item name="smiles" rules={[{ required: true, message: 'Enter a SMILES string' }]} style={{ flex: 1, minWidth: 260 }}>
           <Input placeholder="SMILES, e.g. CC(=O)OC1=CC=CC=C1C(=O)O" />
         </Form.Item>
@@ -48,6 +58,8 @@ export function PredictPanel() {
           </Button>
         </Form.Item>
       </Form>
+
+      <ExampleChips examples={EXAMPLES} onSelect={(value) => form.setFieldsValue({ smiles: value })} />
 
       {error && <Alert type="error" message={error} closable onClose={() => setError(null)} style={{ marginBottom: 16 }} />}
 

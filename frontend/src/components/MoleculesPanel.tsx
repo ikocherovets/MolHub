@@ -3,9 +3,18 @@ import { PlusOutlined } from '@ant-design/icons';
 import { Alert, Button, Card, Checkbox, Flex, Form, Input, Space, Typography } from 'antd';
 import { ApiError, createMolecule, listMolecules } from '../api';
 import type { Molecule } from '../types';
+import { ExampleChips } from './ExampleChips';
 import { MoleculeTable } from './MoleculeTable';
 
 const { Paragraph, Text } = Typography;
+
+const EXAMPLES = [
+  { label: 'Aspirin', value: 'CC(=O)OC1=CC=CC=C1C(=O)O' },
+  { label: 'Caffeine', value: 'CN1C=NC2=C1C(=O)N(C(=O)N2C)C' },
+  { label: 'Ibuprofen', value: 'CC(C)Cc1ccc(cc1)C(C)C(=O)O' },
+  { label: 'Benzene', value: 'c1ccccc1' },
+  { label: 'Ethanol', value: 'CCO' },
+];
 
 export function MoleculesPanel() {
   const [molecules, setMolecules] = useState<Molecule[]>([]);
@@ -61,6 +70,8 @@ export function MoleculesPanel() {
           </Button>
         </Form.Item>
       </Form>
+
+      <ExampleChips examples={EXAMPLES} onSelect={(value) => form.setFieldsValue({ smiles: value })} />
 
       {error && <Alert type="error" message={error} closable onClose={() => setError(null)} style={{ marginBottom: 16 }} />}
 
