@@ -31,12 +31,39 @@ this is meant to be read and run, not deployed.
   [Predicting drug-likeness](#predicting-drug-likeness-qsar-demo)).
 - **postgres** — PostgreSQL with the RDKit cartridge extension (structural search).
 
+## System design
+
+```mermaid
+flowchart TD
+    Client(["Browser"])
+    Client -->|HTTP| FE
+
+    subgraph Docker["docker compose — one bridge network"]
+        FE["frontend<br/>nginx + React (Vite) · :5173<br/>serves the SPA; reverse-proxies<br/>/molecules /search /predict /render /docs"]
+        GW["api-gateway<br/>NestJS · :3000<br/>X-API-Key auth guard<br/>audit-log interceptor · Swagger at /docs"]
+        CS["chem-service<br/>Go · :8080<br/>owns molecule storage<br/>upsert-by-InChIKey · substructure/similarity SQL"]
+        CP["chem-python<br/>FastAPI · :8000<br/>RDKit descriptors + 2D render<br/>scikit-learn drug-likeness model<br/>SDF/CSV batch parsing"]
+        PG[("postgres + RDKit cartridge · :5432<br/>molecules · audit_log")]
+
+        FE -->|REST + multipart| GW
+        GW -->|REST| CS
+        GW -->|audit writes| PG
+        CS -->|REST| CP
+        CS -->|SQL| PG
+    end
 ```
-frontend (React) -> api-gateway (NestJS) -> chem-service (Go) -> chem-python (FastAPI/RDKit)
-                                                  |
-                                                  v
-                                            postgres + rdkit cartridge
-```
+
+Every hop past the frontend requires the `X-API-Key` header, checked once at
+the api-gateway; chem-service and chem-python trust requests that already
+made it past that guard rather than re-checking it themselves. api-gateway
+and chem-service each hold their own connection to the same Postgres instance
+— api-gateway writes `audit_log` directly (a cross-cutting concern, not a
+molecule-storage one), while chem-service owns the `molecules` table and all
+RDKit-cartridge SQL (substructure containment, Tanimoto similarity). The ML
+model chem-python serves is trained into the image at `docker build` time
+(see [Predicting drug-likeness](#predicting-drug-likeness-qsar-demo)), not at
+request time — inference is just a fingerprint + a forward pass through an
+already-loaded scikit-learn model.
 
 ## Running locally
 
