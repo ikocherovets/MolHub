@@ -1,5 +1,6 @@
 import { ExperimentOutlined } from '@ant-design/icons';
 import { Layout, Space, Tabs, Typography } from 'antd';
+import { DashboardPanel } from './components/DashboardPanel';
 import { MoleculesPanel } from './components/MoleculesPanel';
 import { PredictPanel } from './components/PredictPanel';
 import { SimilarityPanel } from './components/SimilarityPanel';
@@ -19,7 +20,7 @@ function App() {
           </Title>
         </Space>
       </Header>
-      <Content style={{ padding: '24px 32px', maxWidth: 1100, width: '100%', margin: '0 auto' }}>
+      <Content style={{ padding: '24px 32px', maxWidth: 1200, width: '100%', margin: '0 auto' }}>
         <Paragraph type="secondary" style={{ marginBottom: 20 }}>
           Store molecules by SMILES, then look them up by drug-likeness, by a SMARTS
           substructure, or by similarity to another molecule. Full endpoint reference:{' '}
@@ -32,6 +33,7 @@ function App() {
             { key: 'substructure', label: 'Substructure search', children: <SubstructurePanel /> },
             { key: 'similarity', label: 'Similarity search', children: <SimilarityPanel /> },
             { key: 'predict', label: 'Predict (ML)', children: <PredictPanel /> },
+            { key: 'dashboard', label: 'Dashboard', children: <DashboardPanel /> },
           ]}
         />
       </Content>
