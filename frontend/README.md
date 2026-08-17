@@ -6,11 +6,12 @@ REST API — no state beyond what's on screen.
 
 ## What it does
 
-Four tabs, each a thin wrapper around one part of the API:
+Five tabs, each a thin wrapper around one part of the API:
 
 - **Molecules** — add a molecule by its SMILES string (MW, LogP, TPSA, H-bond
   donors/acceptors, ring count and Lipinski drug-likeness are computed
   server-side), list stored molecules, optionally filtered to drug-like only.
+  Each row shows a rendered 2D structure, not just the raw SMILES.
 - **Substructure search** — find stored molecules that contain a given SMARTS
   pattern (e.g. `c1ccccc1` for a benzene ring).
 - **Similarity search** — rank stored molecules by Tanimoto similarity
@@ -20,6 +21,14 @@ Four tabs, each a thin wrapper around one part of the API:
   next to the deterministic rule-based value for comparison. See the
   [root README](../README.md#predicting-drug-likeness-qsar-demo) for how the
   model is trained.
+- **Dashboard** — stat tiles (count, % drug-like, average MW) and a LogP-vs-MW
+  "chemical space" scatter of every stored molecule, colored *and* shaped by
+  drug-likeness. See [Visualizations](../README.md#visualizations) for why
+  shape carries the distinction, not just color.
+
+Structures render as actual chemistry, not text: `MoleculeStructure` fetches
+an SVG per SMILES from `POST /render` and caches it at module scope, so the
+same molecule appearing in several tables/panels on one page fetches once.
 
 Every request needs an **API key**, sent as the `X-API-Key` header. This is a
 single-tenant demo, so the key isn't something a visitor manages — `api.ts`
@@ -41,7 +50,7 @@ npm run dev
 ```
 
 This starts a Vite dev server at `http://localhost:5173` that proxies
-`/molecules`, `/search`, `/predict`, `/health` and `/docs` to
+`/molecules`, `/search`, `/predict`, `/render`, `/health` and `/docs` to
 `http://localhost:3000` (configurable via `VITE_API_PROXY_TARGET`), so the
 `api-gateway` container (or a local `npm run start:dev` in `../api-gateway`)
 needs to be running separately.
@@ -66,6 +75,9 @@ src/
     SubstructurePanel.tsx    SMARTS substructure search
     SimilarityPanel.tsx      Tanimoto similarity search
     PredictPanel.tsx         ML drug-likeness prediction
+    DashboardPanel.tsx       stat tiles + chemical space chart
+    ChemicalSpaceChart.tsx   the LogP-vs-MW scatter (hand-built SVG)
+    MoleculeStructure.tsx    2D structure image, with a cross-panel cache
     MoleculeTable.tsx        shared results table
 ```
 

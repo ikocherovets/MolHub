@@ -2,11 +2,13 @@
 
 MolHub is a service-oriented platform for storing and analyzing molecules: it
 computes standard cheminformatics descriptors (MW, LogP, TPSA, H-bond donors/
-acceptors, ring count, Lipinski Rule-of-Five drug-likeness) via RDKit, lets you
-search stored molecules by a SMARTS substructure or by Tanimoto similarity
-(Morgan fingerprints), and predicts drug-likeness with a small scikit-learn
-model — a QSAR-style demo that goes structure → property directly from a
-fingerprint, without computing descriptors at inference time.
+acceptors, ring count, Lipinski Rule-of-Five drug-likeness) via RDKit, renders
+2D structure depictions instead of raw SMILES text, lets you search stored
+molecules by a SMARTS substructure or by Tanimoto similarity (Morgan
+fingerprints), predicts drug-likeness with a small scikit-learn model — a
+QSAR-style demo that goes structure → property directly from a fingerprint,
+without computing descriptors at inference time — and plots the whole
+collection on a LogP-vs-MW "chemical space" scatter.
 
 Backend is NestJS (API gateway, auth, audit trail) + Go (molecule storage) +
 FastAPI/RDKit (cheminformatics + ML) + PostgreSQL with the RDKit cartridge
@@ -24,8 +26,9 @@ this is meant to be read and run, not deployed.
 - **frontend** — React + TypeScript (Vite) + Ant Design. Talks to the api-gateway.
 - **api-gateway** — NestJS (TypeScript). HTTP entrypoint, Swagger docs at `/docs`.
 - **chem-service** — Go. Owns molecule storage; talks to Postgres and to chem-python.
-- **chem-python** — FastAPI + RDKit. Canonicalizes SMILES, computes descriptors, and serves
-  a small scikit-learn drug-likeness classifier (see [Predicting drug-likeness](#predicting-drug-likeness-qsar-demo)).
+- **chem-python** — FastAPI + RDKit. Canonicalizes SMILES, computes descriptors, renders 2D
+  structure SVGs, and serves a small scikit-learn drug-likeness classifier (see
+  [Predicting drug-likeness](#predicting-drug-likeness-qsar-demo)).
 - **postgres** — PostgreSQL with the RDKit cartridge extension (structural search).
 
 ```
@@ -102,6 +105,11 @@ curl -X POST http://localhost:3000/predict/druglike \
   -H "Content-Type: application/json" \
   -H "X-API-Key: demo-key-change-me" \
   -d '{"smiles": "CC(=O)OC1=CC=CC=C1C(=O)O"}'
+
+curl -X POST http://localhost:3000/render \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: demo-key-change-me" \
+  -d '{"smiles": "CC(=O)OC1=CC=CC=C1C(=O)O"}'
 ```
 
 ## Predicting drug-likeness (QSAR demo)
@@ -119,9 +127,24 @@ the drug-like/non-drug-like classes — see `chem-python/data/README.md` and the
 top of `train.py` for exactly how and why. Nothing here needs the internet at build time; the
 dataset is checked into the repo.
 
+## Visualizations
+
+- **2D structures.** `POST /render` draws a SMILES to an SVG via RDKit's `Draw`
+  module; the frontend shows this instead of raw SMILES text wherever a
+  molecule appears (the molecule table, the Predict tab's result), with a
+  small module-level cache so the same molecule isn't re-fetched per row.
+- **Chemical space dashboard.** The frontend's Dashboard tab plots every
+  stored molecule by LogP (x) vs molecular weight (y) — the classic
+  medicinal-chemistry "chemical space" scatter — colored **and shaped**
+  (circle/triangle) by Lipinski drug-likeness. Color alone doesn't survive
+  red-green color blindness (the red/green pair measures ΔE 4.1 under a
+  deutan simulation, well under the accessibility floor), so shape carries
+  the distinction and color only reinforces it.
+
 ## Status
 
 Phases 1-4 (store/read molecules, drug-likeness filter, substructure search,
 similarity search) are implemented end to end, plus a React/Ant Design frontend,
-API-key auth, an audit trail (`audit_log` table, `GET /audit`), and a small
-drug-likeness classifier (`POST /predict/druglike`).
+API-key auth, an audit trail (`audit_log` table, `GET /audit`), a small
+drug-likeness classifier (`POST /predict/druglike`), 2D structure rendering
+(`POST /render`), and a chemical-space dashboard.
