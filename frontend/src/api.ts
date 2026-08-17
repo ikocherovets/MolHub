@@ -1,10 +1,20 @@
-import type { ApiErrorBody, DruglikePrediction, Molecule, SimilarityResult } from './types';
+import type { ApiErrorBody, BatchImportResult, DruglikePrediction, Molecule, SimilarityResult } from './types';
 
 // This is a portfolio demo, not a multi-tenant app, so the key is just baked
 // in rather than exposed as something a visitor is expected to manage.
 const API_KEY = 'demo-key-change-me';
 
 export class ApiError extends Error {}
+
+async function handleResponse<T>(res: Response): Promise<T> {
+  const data = await res.json().catch(() => undefined);
+  if (!res.ok) {
+    const body = data as ApiErrorBody | undefined;
+    const message = body?.error ?? (Array.isArray(body?.message) ? body.message.join(', ') : body?.message) ?? `Request failed (${res.status})`;
+    throw new ApiError(message);
+  }
+  return data as T;
+}
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(path, {
@@ -15,13 +25,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
       ...init?.headers,
     },
   });
-  const data = await res.json().catch(() => undefined);
-  if (!res.ok) {
-    const body = data as ApiErrorBody | undefined;
-    const message = body?.error ?? (Array.isArray(body?.message) ? body.message.join(', ') : body?.message) ?? `Request failed (${res.status})`;
-    throw new ApiError(message);
-  }
-  return data as T;
+  return handleResponse<T>(res);
 }
 
 export function listMolecules(druglikeOnly: boolean): Promise<Molecule[]> {
@@ -47,4 +51,13 @@ export function predictDruglike(smiles: string): Promise<DruglikePrediction> {
 
 export function renderMolecule(smiles: string): Promise<{ svg: string }> {
   return request<{ svg: string }>('/render', { method: 'POST', body: JSON.stringify({ smiles }) });
+}
+
+export async function importMolecules(file: File, format: 'sdf' | 'csv'): Promise<BatchImportResult> {
+  const body = new FormData();
+  body.append('file', file);
+  body.append('format', format);
+  // No Content-Type header — the browser sets the multipart boundary itself.
+  const res = await fetch('/molecules/batch', { method: 'POST', headers: { 'X-API-Key': API_KEY }, body });
+  return handleResponse<BatchImportResult>(res);
 }

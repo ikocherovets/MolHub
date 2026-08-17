@@ -4,6 +4,7 @@ import { Alert, Button, Card, Checkbox, Flex, Form, Input, Space, Tooltip, Typog
 import { ApiError, createMolecule, listMolecules } from '../api';
 import { DRUGLIKE_EXPLANATION } from '../copy';
 import type { Molecule } from '../types';
+import { BatchImportSection } from './BatchImportSection';
 import { ExampleChips } from './ExampleChips';
 import { MoleculeTable } from './MoleculeTable';
 
@@ -89,6 +90,8 @@ export function MoleculesPanel() {
       </Flex>
 
       <MoleculeTable data={molecules} loading={loading} />
+
+      <BatchImportSection onImported={() => load(druglikeOnly)} />
     </Card>
   );
 }

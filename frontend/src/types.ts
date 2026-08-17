@@ -26,3 +26,17 @@ export interface ApiErrorBody {
   message?: string | string[];
   statusCode?: number;
 }
+
+export interface BatchRowResult {
+  row: number;
+  ok: boolean;
+  error?: string;
+  molecule?: Molecule;
+}
+
+export interface BatchImportResult {
+  total: number;
+  inserted: number;
+  failed: number;
+  rows: BatchRowResult[];
+}
