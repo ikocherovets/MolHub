@@ -1,10 +1,15 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards, UseInterceptors } from '@nestjs/common';
+import { ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
+import { ApiKeyGuard } from '../auth/api-key.guard';
+import { AuditInterceptor } from '../audit/audit.interceptor';
 import { SimilaritySearchDto } from './dto/similarity-search.dto';
 import { SubstructureSearchDto } from './dto/substructure-search.dto';
 import { SearchService } from './search.service';
 
 @ApiTags('search')
+@ApiSecurity('api-key')
+@UseGuards(ApiKeyGuard)
+@UseInterceptors(AuditInterceptor)
 @Controller('search')
 export class SearchController {
   constructor(private readonly search: SearchService) {}

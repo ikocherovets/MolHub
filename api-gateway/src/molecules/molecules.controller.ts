@@ -1,9 +1,14 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, Param, Post, Query, UseGuards, UseInterceptors } from '@nestjs/common';
+import { ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
+import { ApiKeyGuard } from '../auth/api-key.guard';
+import { AuditInterceptor } from '../audit/audit.interceptor';
 import { MoleculesService } from './molecules.service';
 import { CreateMoleculeDto } from './dto/create-molecule.dto';
 
 @ApiTags('molecules')
+@ApiSecurity('api-key')
+@UseGuards(ApiKeyGuard)
+@UseInterceptors(AuditInterceptor)
 @Controller('molecules')
 export class MoleculesController {
   constructor(private readonly molecules: MoleculesService) {}

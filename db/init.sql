@@ -23,3 +23,16 @@ CREATE TABLE IF NOT EXISTS molecules (
 CREATE INDEX IF NOT EXISTS molecules_mol_idx ON molecules USING gist (mol);
 CREATE INDEX IF NOT EXISTS molecules_fingerprint_idx ON molecules USING gist (fingerprint);
 CREATE INDEX IF NOT EXISTS molecules_druglike_idx ON molecules (druglike);
+
+-- Audit trail: owned by api-gateway (cross-cutting, not a chem-service concern).
+CREATE TABLE IF NOT EXISTS audit_log (
+    id              BIGSERIAL PRIMARY KEY,
+    api_client      TEXT NOT NULL,              -- name resolved from the caller's API key
+    method          TEXT NOT NULL,
+    path            TEXT NOT NULL,
+    status_code     INTEGER NOT NULL,
+    ip              TEXT,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS audit_log_created_at_idx ON audit_log (created_at DESC);
