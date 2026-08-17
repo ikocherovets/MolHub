@@ -1,15 +1,8 @@
 import type { ApiErrorBody, DruglikePrediction, Molecule, SimilarityResult } from './types';
 
-const API_KEY_STORAGE_KEY = 'molhub.apiKey';
-const DEFAULT_DEV_API_KEY = 'demo-key-change-me';
-
-export function getApiKey(): string {
-  return localStorage.getItem(API_KEY_STORAGE_KEY) ?? DEFAULT_DEV_API_KEY;
-}
-
-export function setApiKey(key: string): void {
-  localStorage.setItem(API_KEY_STORAGE_KEY, key);
-}
+// This is a portfolio demo, not a multi-tenant app, so the key is just baked
+// in rather than exposed as something a visitor is expected to manage.
+const API_KEY = 'demo-key-change-me';
 
 export class ApiError extends Error {}
 
@@ -18,7 +11,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     ...init,
     headers: {
       'Content-Type': 'application/json',
-      'X-API-Key': getApiKey(),
+      'X-API-Key': API_KEY,
       ...init?.headers,
     },
   });

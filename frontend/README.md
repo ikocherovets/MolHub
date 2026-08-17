@@ -2,8 +2,7 @@
 
 React + TypeScript UI for MolHub, built with [Vite](https://vite.dev) and
 [Ant Design](https://ant.design). It's a thin client over the `api-gateway`
-REST API — no state beyond what's on screen and the API key in
-`localStorage`.
+REST API — no state beyond what's on screen.
 
 ## What it does
 
@@ -22,10 +21,10 @@ Four tabs, each a thin wrapper around one part of the API:
   [root README](../README.md#predicting-drug-likeness-qsar-demo) for how the
   model is trained.
 
-Every request needs an **API key**, sent as the `X-API-Key` header — set it in
-the field at the top-right of the page. It's kept in the browser's
-`localStorage` (key `molhub.apiKey`) so it survives reloads, and defaults to
-the demo key `demo-key-change-me` the first time you open the app.
+Every request needs an **API key**, sent as the `X-API-Key` header. This is a
+single-tenant demo, so the key isn't something a visitor manages — `api.ts`
+bakes in the demo key (`demo-key-change-me`) rather than exposing a key input
+in the UI.
 
 ## Running it
 
@@ -63,7 +62,6 @@ src/
   types.ts                  Molecule / SimilarityResult / DruglikePrediction shapes
   App.tsx                   layout + tabs
   components/
-    ApiKeyBar.tsx            API key input (top-right)
     MoleculesPanel.tsx       add + list molecules
     SubstructurePanel.tsx    SMARTS substructure search
     SimilarityPanel.tsx      Tanimoto similarity search

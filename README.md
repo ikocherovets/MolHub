@@ -45,10 +45,10 @@ cp .env.example .env   # first time only
 docker compose up --build
 ```
 
-- **frontend: http://localhost:5173** — the UI. It ships with the demo API key
-  (`demo-key-change-me`) already filled in, so it works out of the box. Every
-  tab has clickable "Try:" example chips (aspirin, caffeine, ibuprofen, ...) so
-  you don't need to know SMILES/SMARTS syntax to explore it.
+- **frontend: http://localhost:5173** — the UI, ready to use with no setup (the
+  demo API key is baked in, not something you need to enter). Every tab has
+  clickable "Try:" example chips (aspirin, caffeine, ibuprofen, ...) so you
+  don't need to know SMILES/SMARTS syntax to explore it.
 - api-gateway: http://localhost:3000 (Swagger at `/docs`)
 - chem-service: http://localhost:8080
 - chem-python: http://localhost:8000
