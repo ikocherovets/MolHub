@@ -41,13 +41,16 @@ func main() {
 		w.Write([]byte(`{"status":"ok"}`))
 	})
 
-	mols := &handlers.Molecules{
-		Pool:   pool,
-		ChemPy: chempy.NewClient(chemPyURL),
-	}
+	chemPy := chempy.NewClient(chemPyURL)
+
+	mols := &handlers.Molecules{Pool: pool, ChemPy: chemPy}
 	mux.HandleFunc("POST /molecules", mols.Create)
 	mux.HandleFunc("GET /molecules", mols.List)
 	mux.HandleFunc("GET /molecules/{id}", mols.Get)
+
+	search := &handlers.Search{Pool: pool, ChemPy: chemPy}
+	mux.HandleFunc("POST /search/substructure", search.Substructure)
+	mux.HandleFunc("POST /search/similarity", search.Similarity)
 
 	log.Printf("chem-service listening on %s", addr)
 	if err := http.ListenAndServe(addr, mux); err != nil {
