@@ -45,10 +45,23 @@ services:
     environment:
       PORT: "3000"
       CHEM_SERVICE_URL: http://chem-service:8080
+      DATABASE_URL: postgres://${POSTGRES_USER:-molhub}:${POSTGRES_PASSWORD:-molhub}@postgres:5432/${POSTGRES_DB:-molhub}
+      API_KEYS: ${API_KEYS:-demo:demo-key-change-me}
     ports:
       - "3000:3000"
     depends_on:
-      - chem-service
+      postgres:
+        condition: service_healthy
+      chem-service:
+        condition: service_started
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      api-gateway:
+        condition: service_started
 
 volumes:
   pgdata:
