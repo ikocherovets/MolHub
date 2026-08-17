@@ -4,16 +4,20 @@ import type { Molecule } from '../types';
 
 const { Text } = Typography;
 
-// Fixed status pair (see dataviz palette: good/critical). Red/green alone
-// fails CVD separation (deutan ΔE 4.1) — shape carries identity too, color
-// only reinforces it.
+// Fixed status pair (see dataviz palette: good/critical), mode-invariant —
+// same hex in light and dark. Red/green alone fails CVD separation (deutan
+// ΔE 4.1) — shape carries identity too, color only reinforces it.
 const COLOR_DRUGLIKE = '#0ca30c';
 const COLOR_NOT_DRUGLIKE = '#d03b3b';
-const GRID = '#e1e0d9';
-const AXIS = '#c3c2b7';
 const MUTED = '#898781';
-const SECONDARY = '#52514e';
-const SURFACE = '#fcfcfb';
+
+// Chart chrome, light/dark pair (see dataviz palette.md) — selected by the
+// `dark` prop, not by prefers-color-scheme, since it must follow the app's
+// own light/dark toggle rather than the OS setting.
+const CHROME = {
+  light: { surface: '#fcfcfb', grid: '#e1e0d9', axis: '#c3c2b7', secondary: '#52514e' },
+  dark: { surface: '#1a1a19', grid: '#2c2c2a', axis: '#383835', secondary: '#c3c2b7' },
+};
 
 const WIDTH = 640;
 const HEIGHT = 380;
@@ -44,8 +48,9 @@ interface Point {
   y: number;
 }
 
-export function ChemicalSpaceChart({ molecules }: { molecules: Molecule[] }) {
+export function ChemicalSpaceChart({ molecules, dark }: { molecules: Molecule[]; dark: boolean }) {
   const [hoverId, setHoverId] = useState<string | null>(null);
+  const { surface: SURFACE, grid: GRID, axis: AXIS, secondary: SECONDARY } = CHROME[dark ? 'dark' : 'light'];
 
   const points: Point[] = molecules
     .filter((m): m is Molecule & { mw: number; logp: number } => m.mw !== null && m.logp !== null)

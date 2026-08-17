@@ -3,12 +3,14 @@ import { QuestionCircleOutlined } from '@ant-design/icons';
 import { Alert, Card, Col, Row, Space, Spin, Statistic, Tooltip, Typography } from 'antd';
 import { ApiError, listMolecules } from '../api';
 import { DRUGLIKE_EXPLANATION } from '../copy';
+import { useThemeMode } from '../theme';
 import type { Molecule } from '../types';
 import { ChemicalSpaceChart } from './ChemicalSpaceChart';
 
 const { Paragraph, Text } = Typography;
 
 export function DashboardPanel() {
+  const { dark } = useThemeMode();
   const [molecules, setMolecules] = useState<Molecule[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -78,7 +80,7 @@ export function DashboardPanel() {
         for details.
       </Paragraph>
 
-      <ChemicalSpaceChart molecules={molecules} />
+      <ChemicalSpaceChart molecules={molecules} dark={dark} />
     </Card>
   );
 }

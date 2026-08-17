@@ -4,6 +4,14 @@ React + TypeScript UI for MolHub, built with [Vite](https://vite.dev) and
 [Ant Design](https://ant.design). It's a thin client over the `api-gateway`
 REST API — no state beyond what's on screen.
 
+Light/dark mode is a switch in the header (`frontend/src/theme.tsx`), defaults
+to the OS preference, and is remembered in `localStorage`. Ant Design
+components follow it automatically via `ConfigProvider`'s theme algorithm;
+the hand-built chart (`ChemicalSpaceChart`) reads it from the same context to
+swap its chrome colors, and `MoleculeStructure` always keeps a fixed white
+background, since RDKit draws black bond lines that would vanish on a dark
+card.
+
 ## What it does
 
 Five tabs, each a thin wrapper around one part of the API:

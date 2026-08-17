@@ -53,8 +53,11 @@ export function MoleculeStructure({ smiles, width = 130, height = 80 }: Molecule
   if (!svg) return <Skeleton.Image active style={{ width, height }} />;
 
   return (
+    // RDKit draws black bond lines with a transparent background, so this
+    // stays fixed white regardless of the app's light/dark mode — otherwise
+    // the structure vanishes on a dark Card background.
     <div
-      style={{ width, height, overflow: 'hidden' }}
+      style={{ width, height, overflow: 'hidden', background: '#ffffff', borderRadius: 4 }}
       dangerouslySetInnerHTML={{ __html: fitToContainer(svg) }}
     />
   );
