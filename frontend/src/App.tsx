@@ -2,6 +2,7 @@ import { ExperimentOutlined } from '@ant-design/icons';
 import { Layout, Space, Tabs, Typography } from 'antd';
 import { ApiKeyBar } from './components/ApiKeyBar';
 import { MoleculesPanel } from './components/MoleculesPanel';
+import { PredictPanel } from './components/PredictPanel';
 import { SimilarityPanel } from './components/SimilarityPanel';
 import { SubstructurePanel } from './components/SubstructurePanel';
 
@@ -33,6 +34,7 @@ function App() {
             { key: 'molecules', label: 'Molecules', children: <MoleculesPanel /> },
             { key: 'substructure', label: 'Substructure search', children: <SubstructurePanel /> },
             { key: 'similarity', label: 'Similarity search', children: <SimilarityPanel /> },
+            { key: 'predict', label: 'Predict (ML)', children: <PredictPanel /> },
           ]}
         />
       </Content>

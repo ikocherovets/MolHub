@@ -14,6 +14,13 @@ export interface SimilarityResult extends Molecule {
   similarity: number;
 }
 
+export interface DruglikePrediction {
+  canonical_smiles: string;
+  predicted_druglike: boolean;
+  probability: number;
+  rule_based_druglike: boolean;
+}
+
 export interface ApiErrorBody {
   error?: string;
   message?: string | string[];

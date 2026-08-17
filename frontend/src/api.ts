@@ -1,4 +1,4 @@
-import type { ApiErrorBody, Molecule, SimilarityResult } from './types';
+import type { ApiErrorBody, DruglikePrediction, Molecule, SimilarityResult } from './types';
 
 const API_KEY_STORAGE_KEY = 'molhub.apiKey';
 const DEFAULT_DEV_API_KEY = 'demo-key-change-me';
@@ -46,4 +46,8 @@ export function searchSubstructure(smarts: string): Promise<Molecule[]> {
 
 export function searchSimilarity(smiles: string, threshold: number): Promise<SimilarityResult[]> {
   return request<SimilarityResult[]>('/search/similarity', { method: 'POST', body: JSON.stringify({ smiles, threshold }) });
+}
+
+export function predictDruglike(smiles: string): Promise<DruglikePrediction> {
+  return request<DruglikePrediction>('/predict/druglike', { method: 'POST', body: JSON.stringify({ smiles }) });
 }

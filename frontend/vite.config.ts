@@ -10,6 +10,7 @@ export default defineConfig({
     proxy: {
       '/molecules': apiTarget,
       '/search': apiTarget,
+      '/predict': apiTarget,
       '/health': apiTarget,
       '/docs': apiTarget,
       '/docs-json': apiTarget,
