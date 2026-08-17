@@ -7,7 +7,7 @@ REST API — no state beyond what's on screen and the API key in
 
 ## What it does
 
-Three tabs, each a thin wrapper around one part of the API:
+Four tabs, each a thin wrapper around one part of the API:
 
 - **Molecules** — add a molecule by its SMILES string (MW, LogP, TPSA, H-bond
   donors/acceptors, ring count and Lipinski drug-likeness are computed
@@ -16,6 +16,11 @@ Three tabs, each a thin wrapper around one part of the API:
   pattern (e.g. `c1ccccc1` for a benzene ring).
 - **Similarity search** — rank stored molecules by Tanimoto similarity
   (Morgan fingerprint) to a query SMILES, above a chosen threshold.
+- **Predict (ML)** — run a SMILES through a small scikit-learn model that
+  predicts Lipinski drug-likeness from its Morgan fingerprint alone, shown
+  next to the deterministic rule-based value for comparison. See the
+  [root README](../README.md#predicting-drug-likeness-qsar-demo) for how the
+  model is trained.
 
 Every request needs an **API key**, sent as the `X-API-Key` header — set it in
 the field at the top-right of the page. It's kept in the browser's
@@ -37,10 +42,10 @@ npm run dev
 ```
 
 This starts a Vite dev server at `http://localhost:5173` that proxies
-`/molecules`, `/search`, `/health` and `/docs` to `http://localhost:3000`
-(configurable via `VITE_API_PROXY_TARGET`), so the `api-gateway` container
-(or a local `npm run start:dev` in `../api-gateway`) needs to be running
-separately.
+`/molecules`, `/search`, `/predict`, `/health` and `/docs` to
+`http://localhost:3000` (configurable via `VITE_API_PROXY_TARGET`), so the
+`api-gateway` container (or a local `npm run start:dev` in `../api-gateway`)
+needs to be running separately.
 
 Other scripts:
 
@@ -55,13 +60,14 @@ npm run lint      # oxlint
 ```
 src/
   api.ts                    fetch wrapper: adds X-API-Key, unwraps errors
-  types.ts                  Molecule / SimilarityResult shapes returned by the API
+  types.ts                  Molecule / SimilarityResult / DruglikePrediction shapes
   App.tsx                   layout + tabs
   components/
     ApiKeyBar.tsx            API key input (top-right)
     MoleculesPanel.tsx       add + list molecules
     SubstructurePanel.tsx    SMARTS substructure search
     SimilarityPanel.tsx      Tanimoto similarity search
+    PredictPanel.tsx         ML drug-likeness prediction
     MoleculeTable.tsx        shared results table
 ```
 

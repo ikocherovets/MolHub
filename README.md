@@ -8,7 +8,8 @@ inside a real service-oriented architecture.
 - **frontend** — React + TypeScript (Vite) + Ant Design. Talks to the api-gateway.
 - **api-gateway** — NestJS (TypeScript). HTTP entrypoint, Swagger docs at `/docs`.
 - **chem-service** — Go. Owns molecule storage; talks to Postgres and to chem-python.
-- **chem-python** — FastAPI + RDKit. Canonicalizes SMILES and computes descriptors.
+- **chem-python** — FastAPI + RDKit. Canonicalizes SMILES, computes descriptors, and serves
+  a small scikit-learn drug-likeness classifier (see [Predicting drug-likeness](#predicting-drug-likeness-qsar-demo)).
 - **postgres** — PostgreSQL with the RDKit cartridge extension (structural search).
 
 ```
@@ -78,11 +79,31 @@ curl -X POST http://localhost:3000/search/similarity \
   -d '{"smiles": "CC(=O)OC1=CC=CC=C1C(=O)O", "threshold": 0.7}'
 
 curl -H "X-API-Key: demo-key-change-me" "http://localhost:3000/audit?limit=20"
+
+curl -X POST http://localhost:3000/predict/druglike \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: demo-key-change-me" \
+  -d '{"smiles": "CC(=O)OC1=CC=CC=C1C(=O)O"}'
 ```
+
+## Predicting drug-likeness (QSAR demo)
+
+`POST /predict/druglike` is a small machine-learning add-on next to the deterministic
+Lipinski rule already computed on every stored molecule: a scikit-learn `RandomForestClassifier`
+trained to predict rule-of-five compliance **from a Morgan fingerprint alone**, without computing
+MW/LogP/TPSA/etc at inference time — a minimal QSAR-style structure-to-property model. The
+response includes both the model's prediction (with probability) and the rule-based ground
+truth, so you can see where the two agree or disagree.
+
+The model trains at `chem-python` Docker build time (`app/ml/train.py`, ~3s), on ~2,600
+molecules built from a public solubility dataset plus synthetic combinations added to balance
+the drug-like/non-drug-like classes — see `chem-python/data/README.md` and the docstring at the
+top of `train.py` for exactly how and why. Nothing here needs the internet at build time; the
+dataset is checked into the repo.
 
 ## Status
 
 Phases 1-4 (store/read molecules, drug-likeness filter, substructure search,
 similarity search) are implemented end to end, plus a React/Ant Design frontend,
-API-key auth and an audit trail (`audit_log` table, `GET /audit`).
-Analytics cron is next.
+API-key auth, an audit trail (`audit_log` table, `GET /audit`), and a small
+drug-likeness classifier (`POST /predict/druglike`).
