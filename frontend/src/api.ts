@@ -44,3 +44,7 @@ export function searchSimilarity(smiles: string, threshold: number): Promise<Sim
 export function predictDruglike(smiles: string): Promise<DruglikePrediction> {
   return request<DruglikePrediction>('/predict/druglike', { method: 'POST', body: JSON.stringify({ smiles }) });
 }
+
+export function renderMolecule(smiles: string): Promise<{ svg: string }> {
+  return request<{ svg: string }>('/render', { method: 'POST', body: JSON.stringify({ smiles }) });
+}

@@ -1,12 +1,20 @@
 import { Table, Tag, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import type { Molecule, SimilarityResult } from '../types';
+import { MoleculeStructure } from './MoleculeStructure';
 
 const { Text } = Typography;
 
 function baseColumns<T extends Molecule>(): ColumnsType<T> {
   return [
     { title: 'ID', dataIndex: 'id', key: 'id', width: 90, ellipsis: true },
+    {
+      title: 'Structure',
+      dataIndex: 'smiles',
+      key: 'structure',
+      width: 140,
+      render: (value: string) => <MoleculeStructure smiles={value} />,
+    },
     {
       title: 'SMILES',
       dataIndex: 'smiles',

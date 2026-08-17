@@ -11,6 +11,7 @@ export default defineConfig({
       '/molecules': apiTarget,
       '/search': apiTarget,
       '/predict': apiTarget,
+      '/render': apiTarget,
       '/health': apiTarget,
       '/docs': apiTarget,
       '/docs-json': apiTarget,

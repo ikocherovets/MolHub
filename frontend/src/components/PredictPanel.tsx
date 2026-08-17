@@ -4,6 +4,7 @@ import { Alert, Button, Card, Descriptions, Form, Input, Progress, Tag, Typograp
 import { ApiError, predictDruglike } from '../api';
 import type { DruglikePrediction } from '../types';
 import { ExampleChips } from './ExampleChips';
+import { MoleculeStructure } from './MoleculeStructure';
 
 const { Paragraph, Text } = Typography;
 
@@ -65,6 +66,9 @@ export function PredictPanel() {
 
       {result && (
         <Descriptions bordered column={1} size="small">
+          <Descriptions.Item label="Structure">
+            <MoleculeStructure smiles={result.canonical_smiles} width={200} height={120} />
+          </Descriptions.Item>
           <Descriptions.Item label="Canonical SMILES">
             <Text code>{result.canonical_smiles}</Text>
           </Descriptions.Item>
