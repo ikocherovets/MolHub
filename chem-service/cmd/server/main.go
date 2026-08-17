@@ -52,6 +52,9 @@ func main() {
 	mux.HandleFunc("POST /search/substructure", search.Substructure)
 	mux.HandleFunc("POST /search/similarity", search.Similarity)
 
+	predict := &handlers.Predict{ChemPy: chemPy}
+	mux.HandleFunc("POST /predict/druglike", predict.Druglike)
+
 	log.Printf("chem-service listening on %s", addr)
 	if err := http.ListenAndServe(addr, mux); err != nil {
 		log.Fatal(err)

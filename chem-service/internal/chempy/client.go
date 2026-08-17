@@ -64,3 +64,36 @@ func (c *Client) Analyze(smiles string) (*AnalyzeResult, error) {
 	}
 	return &result, nil
 }
+
+type DruglikePrediction struct {
+	CanonicalSmiles   string  `json:"canonical_smiles"`
+	PredictedDruglike bool    `json:"predicted_druglike"`
+	Probability       float64 `json:"probability"`
+	RuleBasedDruglike bool    `json:"rule_based_druglike"`
+}
+
+func (c *Client) PredictDruglike(smiles string) (*DruglikePrediction, error) {
+	body, err := json.Marshal(map[string]string{"smiles": smiles})
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := c.http.Post(c.baseURL+"/predict/druglike", "application/json", bytes.NewReader(body))
+	if err != nil {
+		return nil, fmt.Errorf("calling chem-python: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusUnprocessableEntity {
+		return nil, &ErrInvalidSmiles{Smiles: smiles}
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("chem-python returned status %d", resp.StatusCode)
+	}
+
+	var result DruglikePrediction
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return nil, fmt.Errorf("decoding chem-python response: %w", err)
+	}
+	return &result, nil
+}
