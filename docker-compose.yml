@@ -1,17 +1,17 @@
 services:
   postgres:
-    image: iskoldt/postgres16-rdkit:latest
+    image: iskoldt/postgres16-rdkit@sha256:42202485fbe7c8e873cad400dec43d7490f70c1771e5d842b245aff02b2036e4
     environment:
-      POSTGRES_USER: molhub
-      POSTGRES_PASSWORD: molhub
-      POSTGRES_DB: molhub
+      POSTGRES_USER: ${POSTGRES_USER:-molhub}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-molhub}
+      POSTGRES_DB: ${POSTGRES_DB:-molhub}
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U molhub -d molhub"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-molhub} -d ${POSTGRES_DB:-molhub}"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -29,7 +29,7 @@ services:
   chem-service:
     build: ./chem-service
     environment:
-      DATABASE_URL: postgres://molhub:molhub@postgres:5432/molhub
+      DATABASE_URL: postgres://${POSTGRES_USER:-molhub}:${POSTGRES_PASSWORD:-molhub}@postgres:5432/${POSTGRES_DB:-molhub}
       CHEM_PYTHON_URL: http://chem-python:8000
       ADDR: ":8080"
     ports:

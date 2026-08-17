@@ -15,8 +15,8 @@ import (
 )
 
 type Molecules struct {
-	Pool    *pgxpool.Pool
-	ChemPy  *chempy.Client
+	Pool   *pgxpool.Pool
+	ChemPy *chempy.Client
 }
 
 type createMoleculeRequest struct {
@@ -96,16 +96,42 @@ func (h *Molecules) Get(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, mol)
 }
 
-func (h *Molecules) List(w http.ResponseWriter, r *http.Request) {
-	query := `SELECT id, smiles, inchikey, mw, logp, tpsa, h_donors, h_acceptors, ring_count, druglike FROM molecules`
-	args := []any{}
+const (
+	defaultListLimit = 100
+	maxListLimit     = 500
+)
 
+func (h *Molecules) List(w http.ResponseWriter, r *http.Request) {
+	limit := defaultListLimit
+	if v := r.URL.Query().Get("limit"); v != "" {
+		parsed, err := strconv.Atoi(v)
+		if err != nil || parsed < 1 {
+			writeError(w, http.StatusBadRequest, "limit must be a positive integer")
+			return
+		}
+		if parsed > maxListLimit {
+			parsed = maxListLimit
+		}
+		limit = parsed
+	}
+
+	offset := 0
+	if v := r.URL.Query().Get("offset"); v != "" {
+		parsed, err := strconv.Atoi(v)
+		if err != nil || parsed < 0 {
+			writeError(w, http.StatusBadRequest, "offset must be a non-negative integer")
+			return
+		}
+		offset = parsed
+	}
+
+	query := `SELECT id, smiles, inchikey, mw, logp, tpsa, h_donors, h_acceptors, ring_count, druglike FROM molecules`
 	if r.URL.Query().Get("druglike") == "true" {
 		query += ` WHERE druglike = true`
 	}
-	query += ` ORDER BY id DESC LIMIT 100`
+	query += ` ORDER BY id DESC LIMIT $1 OFFSET $2`
 
-	rows, err := h.Pool.Query(r.Context(), query, args...)
+	rows, err := h.Pool.Query(r.Context(), query, limit, offset)
 	if err != nil {
 		log.Printf("db query error: %v", err)
 		writeError(w, http.StatusInternalServerError, "failed to list molecules")

@@ -20,10 +20,11 @@ client -> api-gateway (NestJS) -> chem-service (Go) -> chem-python (FastAPI/RDKi
 ## Running locally
 
 ```bash
+cp .env.example .env   # first time only
 docker compose up --build
 ```
 
-- API gateway: http://localhost:3000 (Swagger at `/docs`)
+- API gateway / frontend: http://localhost:3000 (Swagger at `/docs`)
 - chem-service: http://localhost:8080
 - chem-python: http://localhost:8000
 
@@ -34,10 +35,19 @@ curl -X POST http://localhost:3000/molecules \
   -H "Content-Type: application/json" \
   -d '{"smiles": "CC(=O)OC1=CC=CC=C1C(=O)O"}'
 
-curl http://localhost:3000/molecules?druglike=true
+curl "http://localhost:3000/molecules?druglike=true&limit=20&offset=0"
+
+curl -X POST http://localhost:3000/search/substructure \
+  -H "Content-Type: application/json" \
+  -d '{"smarts": "c1ccccc1"}'
+
+curl -X POST http://localhost:3000/search/similarity \
+  -H "Content-Type: application/json" \
+  -d '{"smiles": "CC(=O)OC1=CC=CC=C1C(=O)O", "threshold": 0.7}'
 ```
 
 ## Status
 
-Phase 1 (store & read molecules with computed descriptors) is implemented end to end.
-Substructure search, similarity search, analytics cron and auth/audit are next.
+Phases 1-4 (store/read molecules, drug-likeness filter, substructure search,
+similarity search) are implemented end to end, plus a bare-bones frontend.
+Analytics cron and auth/audit are next.

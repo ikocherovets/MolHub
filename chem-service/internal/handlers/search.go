@@ -77,8 +77,8 @@ func (h *Search) Substructure(w http.ResponseWriter, r *http.Request) {
 }
 
 type similarityRequest struct {
-	Smiles    string  `json:"smiles"`
-	Threshold float64 `json:"threshold"`
+	Smiles    string   `json:"smiles"`
+	Threshold *float64 `json:"threshold"`
 }
 
 type moleculeWithSimilarity struct {
@@ -95,9 +95,9 @@ func (h *Search) Similarity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	threshold := req.Threshold
-	if threshold == 0 {
-		threshold = 0.7
+	threshold := 0.7
+	if req.Threshold != nil {
+		threshold = *req.Threshold
 	}
 	if threshold < 0 || threshold > 1 {
 		writeError(w, http.StatusBadRequest, "threshold must be between 0 and 1")

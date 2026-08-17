@@ -16,8 +16,16 @@ export class MoleculesController {
 
   @Get()
   @ApiOperation({ summary: 'List stored molecules, optionally filtered by drug-likeness' })
-  list(@Query('druglike') druglike?: string) {
-    return this.molecules.list(druglike === 'true');
+  list(
+    @Query('druglike') druglike?: string,
+    @Query('limit') limit?: string,
+    @Query('offset') offset?: string,
+  ) {
+    return this.molecules.list(
+      druglike === 'true',
+      limit !== undefined ? Number(limit) : undefined,
+      offset !== undefined ? Number(offset) : undefined,
+    );
   }
 
   @Get(':id')

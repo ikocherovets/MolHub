@@ -1,6 +1,7 @@
 node_modules/
 dist/
 *.log
+.env
 
 # Go
 chem-service/chem-service

@@ -14,8 +14,12 @@ export class MoleculesService {
     return this.forward(() => this.http.post(`${this.baseUrl}/molecules`, dto));
   }
 
-  async list(druglike: boolean) {
-    const query = druglike ? '?druglike=true' : '';
+  async list(druglike: boolean, limit?: number, offset?: number) {
+    const params = new URLSearchParams();
+    if (druglike) params.set('druglike', 'true');
+    if (limit !== undefined) params.set('limit', String(limit));
+    if (offset !== undefined) params.set('offset', String(offset));
+    const query = params.toString() ? `?${params.toString()}` : '';
     return this.forward(() => this.http.get(`${this.baseUrl}/molecules${query}`));
   }
 
