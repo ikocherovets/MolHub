@@ -6,6 +6,11 @@ dist/
 # Go
 chem-service/chem-service
 
+# Python
+__pycache__/
+*.pyc
+*.joblib
+
 # editors
 .vscode/
 .idea/
