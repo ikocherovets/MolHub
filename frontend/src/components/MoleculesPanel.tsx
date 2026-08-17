@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
 import { PlusOutlined } from '@ant-design/icons';
-import { Alert, Button, Card, Checkbox, Flex, Form, Input, Space } from 'antd';
+import { Alert, Button, Card, Checkbox, Flex, Form, Input, Space, Typography } from 'antd';
 import { ApiError, createMolecule, listMolecules } from '../api';
 import type { Molecule } from '../types';
 import { MoleculeTable } from './MoleculeTable';
+
+const { Paragraph, Text } = Typography;
 
 export function MoleculesPanel() {
   const [molecules, setMolecules] = useState<Molecule[]>([]);
@@ -45,6 +47,10 @@ export function MoleculesPanel() {
 
   return (
     <Card title="Molecules" bordered={false}>
+      <Paragraph type="secondary">
+        Store a molecule from its <Text code>SMILES</Text> string — MW, LogP, TPSA, H-bond
+        donors/acceptors, ring count and Lipinski drug-likeness are computed automatically.
+      </Paragraph>
       <Form form={form} layout="inline" onFinish={onAdd} style={{ marginBottom: 16 }}>
         <Form.Item name="smiles" rules={[{ required: true, message: 'Enter a SMILES string' }]} style={{ flex: 1, minWidth: 260 }}>
           <Input placeholder="SMILES, e.g. CC(=O)OC1=CC=CC=C1C(=O)O" />
