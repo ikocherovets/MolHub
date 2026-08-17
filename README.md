@@ -1,10 +1,23 @@
 # MolHub — Molecular Screening Platform
 
-A full-stack cheminformatics platform: store molecules by SMILES, search them by
-drug-likeness, SMARTS substructure or Tanimoto similarity, and predict Lipinski
-drug-likeness with a small ML model — all behind a service-oriented backend
-(NestJS + Go + FastAPI/RDKit + PostgreSQL/RDKit-cartridge) and a React UI, running
-as one Docker Compose stack.
+MolHub is a service-oriented platform for storing and analyzing molecules: it
+computes standard cheminformatics descriptors (MW, LogP, TPSA, H-bond donors/
+acceptors, ring count, Lipinski Rule-of-Five drug-likeness) via RDKit, lets you
+search stored molecules by a SMARTS substructure or by Tanimoto similarity
+(Morgan fingerprints), and predicts drug-likeness with a small scikit-learn
+model — a QSAR-style demo that goes structure → property directly from a
+fingerprint, without computing descriptors at inference time.
+
+Backend is NestJS (API gateway, auth, audit trail) + Go (molecule storage) +
+FastAPI/RDKit (cheminformatics + ML) + PostgreSQL with the RDKit cartridge
+(structural search in SQL). Frontend is React + Ant Design. The whole stack —
+including the UI — starts with one `docker compose up`.
+
+Built as a portfolio project bridging a software engineering background with
+a Master's in Chemical Sciences and prior cheminformatics/lab-automation
+research (the "Chemputer" project, University of Glasgow) — to show that
+combination concretely rather than just list it. No CI/CD here by design;
+this is meant to be read and run, not deployed.
 
 ## Stack
 
