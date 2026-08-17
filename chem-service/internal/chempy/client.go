@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"mime/multipart"
 	"net/http"
 	"time"
 )
@@ -16,7 +17,7 @@ type Client struct {
 func NewClient(baseURL string) *Client {
 	return &Client{
 		baseURL: baseURL,
-		http:    &http.Client{Timeout: 10 * time.Second},
+		http:    &http.Client{Timeout: 30 * time.Second},
 	}
 }
 
@@ -97,6 +98,66 @@ func (c *Client) Render(smiles string) (*RenderResult, error) {
 	var result RenderResult
 	if err := c.postSmiles("/render", smiles, &result); err != nil {
 		return nil, err
+	}
+	return &result, nil
+}
+
+// BatchRow mirrors chem-python's BatchRow — pointer fields since a failed
+// row has none of the descriptors.
+type BatchRow struct {
+	Row             int      `json:"row"`
+	OK              bool     `json:"ok"`
+	Error           string   `json:"error,omitempty"`
+	CanonicalSmiles string   `json:"canonical_smiles,omitempty"`
+	InChIKey        string   `json:"inchikey,omitempty"`
+	MW              *float64 `json:"mw,omitempty"`
+	LogP            *float64 `json:"logp,omitempty"`
+	TPSA            *float64 `json:"tpsa,omitempty"`
+	HDonors         *int     `json:"h_donors,omitempty"`
+	HAcceptors      *int     `json:"h_acceptors,omitempty"`
+	RingCount       *int     `json:"ring_count,omitempty"`
+	Druglike        *bool    `json:"druglike,omitempty"`
+}
+
+type BatchAnalyzeResult struct {
+	Total int        `json:"total"`
+	Rows  []BatchRow `json:"rows"`
+}
+
+// BatchAnalyze uploads a file (SDF or CSV/SMILES-per-line) to chem-python's
+// POST /batch/analyze for parsing + descriptor calculation — parsing only,
+// no storage.
+func (c *Client) BatchAnalyze(filename, format string, content []byte) (*BatchAnalyzeResult, error) {
+	var body bytes.Buffer
+	writer := multipart.NewWriter(&body)
+
+	part, err := writer.CreateFormFile("file", filename)
+	if err != nil {
+		return nil, fmt.Errorf("building multipart request: %w", err)
+	}
+	if _, err := part.Write(content); err != nil {
+		return nil, fmt.Errorf("building multipart request: %w", err)
+	}
+	if err := writer.WriteField("format", format); err != nil {
+		return nil, fmt.Errorf("building multipart request: %w", err)
+	}
+	if err := writer.Close(); err != nil {
+		return nil, fmt.Errorf("building multipart request: %w", err)
+	}
+
+	resp, err := c.http.Post(c.baseURL+"/batch/analyze", writer.FormDataContentType(), &body)
+	if err != nil {
+		return nil, fmt.Errorf("calling chem-python: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("chem-python returned status %d", resp.StatusCode)
+	}
+
+	var result BatchAnalyzeResult
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return nil, fmt.Errorf("decoding chem-python response: %w", err)
 	}
 	return &result, nil
 }

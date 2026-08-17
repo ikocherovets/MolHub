@@ -48,6 +48,9 @@ func main() {
 	mux.HandleFunc("GET /molecules", mols.List)
 	mux.HandleFunc("GET /molecules/{id}", mols.Get)
 
+	batchImport := &handlers.BatchImport{Pool: pool, ChemPy: chemPy}
+	mux.HandleFunc("POST /molecules/batch", batchImport.Create)
+
 	search := &handlers.Search{Pool: pool, ChemPy: chemPy}
 	mux.HandleFunc("POST /search/substructure", search.Substructure)
 	mux.HandleFunc("POST /search/similarity", search.Similarity)
