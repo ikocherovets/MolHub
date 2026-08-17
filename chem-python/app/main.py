@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
-from app import chem
+from app import chem, render
 from app.ml.predict import predict_druglike
 
 app = FastAPI(title="MolHub chem-python")
@@ -28,6 +28,10 @@ class DruglikePrediction(BaseModel):
     predicted_druglike: bool
     probability: float
     rule_based_druglike: bool
+
+
+class RenderResponse(BaseModel):
+    svg: str
 
 
 @app.get("/health")
@@ -64,3 +68,13 @@ def predict(req: SmilesRequest):
         probability=round(probability, 4),
         rule_based_druglike=descriptors["druglike"],
     )
+
+
+@app.post("/render", response_model=RenderResponse)
+def render_molecule(req: SmilesRequest):
+    try:
+        mol = chem.parse_smiles(req.smiles)
+    except chem.InvalidSmiles:
+        raise HTTPException(status_code=422, detail="invalid SMILES")
+
+    return RenderResponse(svg=render.render_svg(mol))

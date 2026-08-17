@@ -2,6 +2,11 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
+# RDKit's Draw module (used by /render) needs libXrender/libXext at runtime.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libxrender1 libxext6 libexpat1 \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
