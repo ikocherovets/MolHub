@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>MolHub</title>
+<style>
+  body { font-family: sans-serif; max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
+  h1 { margin-bottom: 0.25rem; }
+  .sub { color: #666; margin-top: 0; }
+  form { display: flex; gap: 0.5rem; margin: 1.5rem 0; }
+  input[type=text] { flex: 1; padding: 0.5rem; font-family: monospace; }
+  button { padding: 0.5rem 1rem; }
+  #error { color: #b00020; margin: 0.5rem 0; }
+  table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+  th, td { text-align: left; padding: 0.4rem 0.6rem; border-bottom: 1px solid #ddd; font-size: 0.9rem; }
+  td.smiles { font-family: monospace; }
+  .yes { color: #0a7a0a; }
+  .no { color: #999; }
+  label { display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.5rem; }
+</style>
+</head>
+<body>
+
+<h1>MolHub</h1>
+<p class="sub">Store a molecule from SMILES, list what's stored. Swagger docs: <a href="/docs">/docs</a></p>
+
+<form id="add-form">
+  <input type="text" id="smiles-input" placeholder="SMILES, e.g. CC(=O)OC1=CC=CC=C1C(=O)O" required>
+  <button type="submit">Add molecule</button>
+</form>
+<div id="error"></div>
+
+<label><input type="checkbox" id="druglike-filter"> Show drug-like (Lipinski) only</label>
+
+<table>
+  <thead>
+    <tr>
+      <th>ID</th><th>SMILES</th><th>MW</th><th>LogP</th><th>TPSA</th>
+      <th>HBD</th><th>HBA</th><th>Rings</th><th>Drug-like</th>
+    </tr>
+  </thead>
+  <tbody id="molecules-body"></tbody>
+</table>
+
+<script>
+const form = document.getElementById('add-form');
+const input = document.getElementById('smiles-input');
+const errorBox = document.getElementById('error');
+const body = document.getElementById('molecules-body');
+const druglikeFilter = document.getElementById('druglike-filter');
+
+async function loadMolecules() {
+  errorBox.textContent = '';
+  const query = druglikeFilter.checked ? '?druglike=true' : '';
+  const res = await fetch('/molecules' + query);
+  const data = await res.json();
+  if (!res.ok) {
+    errorBox.textContent = data.error || data.message || 'Failed to load molecules';
+    return;
+  }
+  body.innerHTML = data.map(m => `
+    <tr>
+      <td>${m.id}</td>
+      <td class="smiles">${m.smiles}</td>
+      <td>${m.mw}</td>
+      <td>${m.logp}</td>
+      <td>${m.tpsa}</td>
+      <td>${m.h_donors}</td>
+      <td>${m.h_acceptors}</td>
+      <td>${m.ring_count}</td>
+      <td class="${m.druglike ? 'yes' : 'no'}">${m.druglike ? 'yes' : 'no'}</td>
+    </tr>
+  `).join('');
+}
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  errorBox.textContent = '';
+  const res = await fetch('/molecules', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ smiles: input.value.trim() }),
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    errorBox.textContent = data.error || data.message || 'Failed to add molecule';
+    return;
+  }
+  input.value = '';
+  loadMolecules();
+});
+
+druglikeFilter.addEventListener('change', loadMolecules);
+
+loadMolecules();
+</script>
+
+</body>
+</html>
