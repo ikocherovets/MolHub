@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
-import { PlusOutlined } from '@ant-design/icons';
-import { Alert, Button, Card, Checkbox, Flex, Form, Input, Space, Typography } from 'antd';
+import { PlusOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+import { Alert, Button, Card, Checkbox, Flex, Form, Input, Space, Tooltip, Typography } from 'antd';
 import { ApiError, createMolecule, listMolecules } from '../api';
+import { DRUGLIKE_EXPLANATION } from '../copy';
 import type { Molecule } from '../types';
 import { ExampleChips } from './ExampleChips';
 import { MoleculeTable } from './MoleculeTable';
@@ -77,7 +78,12 @@ export function MoleculesPanel() {
 
       <Flex justify="space-between" align="center" style={{ marginBottom: 12 }}>
         <Checkbox checked={druglikeOnly} onChange={(e) => setDruglikeOnly(e.target.checked)}>
-          Show drug-like (Lipinski) only
+          <Space size={4}>
+            Show drug-like (Lipinski) only
+            <Tooltip title={DRUGLIKE_EXPLANATION}>
+              <QuestionCircleOutlined />
+            </Tooltip>
+          </Space>
         </Checkbox>
         <Space />
       </Flex>

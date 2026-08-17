@@ -1,5 +1,7 @@
-import { Table, Tag, Typography } from 'antd';
+import { QuestionCircleOutlined } from '@ant-design/icons';
+import { Space, Table, Tag, Tooltip, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
+import { DRUGLIKE_EXPLANATION } from '../copy';
 import type { Molecule, SimilarityResult } from '../types';
 import { MoleculeStructure } from './MoleculeStructure';
 
@@ -28,7 +30,14 @@ function baseColumns<T extends Molecule>(): ColumnsType<T> {
     { title: 'HBA', dataIndex: 'h_acceptors', key: 'h_acceptors', width: 70 },
     { title: 'Rings', dataIndex: 'ring_count', key: 'ring_count', width: 80 },
     {
-      title: 'Drug-like',
+      title: (
+        <Tooltip title={DRUGLIKE_EXPLANATION}>
+          <Space size={4}>
+            Drug-like
+            <QuestionCircleOutlined />
+          </Space>
+        </Tooltip>
+      ),
       dataIndex: 'druglike',
       key: 'druglike',
       width: 110,
