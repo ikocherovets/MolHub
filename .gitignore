@@ -1,0 +1,11 @@
+node_modules/
+dist/
+*.log
+
+# Go
+chem-service/chem-service
+
+# editors
+.vscode/
+.idea/
+.DS_Store
