@@ -19,7 +19,7 @@ export function ExampleChips({ examples, onSelect }: ExampleChipsProps) {
         Try:
       </Text>
       {examples.map((example) => (
-        <Tag key={example.label} style={{ cursor: 'pointer' }} onClick={() => onSelect(example.value)}>
+        <Tag key={example.label} className="mh-chip" onClick={() => onSelect(example.value)}>
           {example.label}
         </Tag>
       ))}

@@ -61,6 +61,13 @@ func main() {
 	render := &handlers.Render{ChemPy: chemPy}
 	mux.HandleFunc("POST /render", render.Molecule)
 
+	space := &handlers.Space{Pool: pool, ChemPy: chemPy}
+	mux.HandleFunc("GET /molecules/space", space.Embed)
+
+	cluster := &handlers.Cluster{Pool: pool, ChemPy: chemPy}
+	mux.HandleFunc("GET /molecules/cluster/kmeans", cluster.KMeans)
+	mux.HandleFunc("GET /molecules/cluster/som", cluster.SOM)
+
 	log.Printf("chem-service listening on %s", addr)
 	if err := http.ListenAndServe(addr, mux); err != nil {
 		log.Fatal(err)

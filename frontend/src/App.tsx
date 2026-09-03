@@ -5,29 +5,57 @@ import { MoleculesPanel } from './components/MoleculesPanel';
 import { PredictPanel } from './components/PredictPanel';
 import { SimilarityPanel } from './components/SimilarityPanel';
 import { SubstructurePanel } from './components/SubstructurePanel';
-import { useThemeMode } from './theme';
+import { palette, paletteCssVars, useThemeMode } from './theme';
 
 const { Header, Content, Footer } = Layout;
-const { Title, Paragraph, Link } = Typography;
+const { Title, Paragraph, Link, Text } = Typography;
+
+const FONT_FAMILY = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
 
 function App() {
   const { dark, setDark } = useThemeMode();
+  const p = palette[dark ? 'dark' : 'light'];
 
   return (
     <ConfigProvider
       theme={{
         algorithm: dark ? theme.darkAlgorithm : theme.defaultAlgorithm,
-        token: { colorPrimary: '#1677ff', borderRadius: 8 },
+        token: {
+          colorPrimary: p.primary,
+          colorBgLayout: p.bg,
+          colorBgContainer: p.surface,
+          colorBorder: p.border,
+          colorBorderSecondary: p.border,
+          borderRadius: 8,
+          fontFamily: FONT_FAMILY,
+        },
+        components: {
+          Layout: { headerBg: p.surface, bodyBg: p.bg, footerBg: 'transparent' },
+          Tag: { defaultBg: p.surfaceSubtle, defaultColor: p.textSecondary },
+        },
       }}
     >
       <AntApp>
-        <Layout style={{ minHeight: '100vh' }}>
-          <Header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Space>
-              <ExperimentOutlined style={{ color: '#fff', fontSize: 22 }} />
-              <Title level={4} style={{ color: '#fff', margin: 0 }}>
+        <Layout style={{ minHeight: '100vh', ...paletteCssVars(p) }}>
+          <Header
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              borderBottom: `1px solid ${p.border}`,
+              padding: '0 32px',
+              height: 64,
+              lineHeight: '64px',
+            }}
+          >
+            <Space size={10}>
+              <ExperimentOutlined style={{ color: p.primary, fontSize: 20 }} />
+              <Title level={4} style={{ color: p.text, margin: 0, fontWeight: 600 }}>
                 MolHub
               </Title>
+              <Text type="secondary" style={{ fontSize: 13, marginLeft: 4 }}>
+                Molecular screening
+              </Text>
             </Space>
             <Switch
               checked={dark}
@@ -37,8 +65,8 @@ function App() {
               aria-label="Toggle dark mode"
             />
           </Header>
-          <Content style={{ padding: '24px 32px', maxWidth: 1200, width: '100%', margin: '0 auto' }}>
-            <Paragraph type="secondary" style={{ marginBottom: 20 }}>
+          <Content style={{ padding: '28px 32px', maxWidth: 1200, width: '100%', margin: '0 auto' }}>
+            <Paragraph type="secondary" style={{ marginBottom: 24 }}>
               Store molecules by SMILES, then look them up by drug-likeness, by a SMARTS
               substructure, or by similarity to another molecule. Full endpoint reference:{' '}
               <Link href="/docs" target="_blank">Swagger docs</Link>.
@@ -54,7 +82,17 @@ function App() {
               ]}
             />
           </Content>
-          <Footer style={{ textAlign: 'center' }}>MolHub — molecular screening platform</Footer>
+          <Footer
+            style={{
+              textAlign: 'center',
+              color: p.textSecondary,
+              fontSize: 13,
+              borderTop: `1px solid ${p.border}`,
+              padding: '16px 0',
+            }}
+          >
+            MolHub — molecular screening platform
+          </Footer>
         </Layout>
       </AntApp>
     </ConfigProvider>

@@ -49,26 +49,32 @@ export function DashboardPanel() {
         the stat below, or hover any point on the chart, for the exact rule.
       </Paragraph>
 
-      <Row gutter={24} style={{ marginBottom: 24 }}>
+      <Row gutter={16} style={{ marginBottom: 24 }}>
         <Col>
-          <Statistic title="Molecules stored" value={total} />
+          <div className="mh-stat-box">
+            <Statistic title="Molecules stored" value={total} />
+          </div>
         </Col>
         <Col>
-          <Statistic
-            title={
-              <Tooltip title={DRUGLIKE_EXPLANATION}>
-                <Space size={4}>
-                  <Text type="secondary">Drug-like</Text>
-                  <QuestionCircleOutlined />
-                </Space>
-              </Tooltip>
-            }
-            value={total ? Math.round((druglikeCount / total) * 100) : 0}
-            suffix="%"
-          />
+          <div className="mh-stat-box">
+            <Statistic
+              title={
+                <Tooltip title={DRUGLIKE_EXPLANATION}>
+                  <Space size={4}>
+                    <Text type="secondary">Drug-like</Text>
+                    <QuestionCircleOutlined />
+                  </Space>
+                </Tooltip>
+              }
+              value={total ? Math.round((druglikeCount / total) * 100) : 0}
+              suffix="%"
+            />
+          </div>
         </Col>
         <Col>
-          <Statistic title="Average MW" value={avgMw} precision={1} />
+          <div className="mh-stat-box">
+            <Statistic title="Average MW" value={avgMw} precision={1} />
+          </div>
         </Col>
       </Row>
 

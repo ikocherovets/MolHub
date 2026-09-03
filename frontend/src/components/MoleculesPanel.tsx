@@ -1,12 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
-import { PlusOutlined, QuestionCircleOutlined } from '@ant-design/icons';
-import { Alert, Button, Card, Checkbox, Flex, Form, Input, Space, Tooltip, Typography } from 'antd';
+import { PlusOutlined, QuestionCircleOutlined, SwapOutlined } from '@ant-design/icons';
+import { Alert, Button, Card, Checkbox, Flex, Form, Input, Modal, Segmented, Space, Tooltip, Typography } from 'antd';
 import { ApiError, createMolecule, listMolecules } from '../api';
 import { DRUGLIKE_EXPLANATION } from '../copy';
+import { useThemeMode } from '../theme';
 import type { Molecule } from '../types';
 import { BatchImportSection } from './BatchImportSection';
 import { ExampleChips } from './ExampleChips';
+import { MoleculeGrid } from './MoleculeGrid';
 import { MoleculeTable } from './MoleculeTable';
+import { MAX_COMPARE, PropertyRadarChart } from './PropertyRadarChart';
 
 const { Paragraph, Text } = Typography;
 
@@ -19,11 +22,15 @@ const EXAMPLES = [
 ];
 
 export function MoleculesPanel() {
+  const { dark } = useThemeMode();
   const [molecules, setMolecules] = useState<Molecule[]>([]);
   const [druglikeOnly, setDruglikeOnly] = useState(false);
+  const [view, setView] = useState<'table' | 'grid'>('table');
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [compareOpen, setCompareOpen] = useState(false);
   const [form] = Form.useForm<{ smiles: string }>();
 
   const load = useCallback(async (filter: boolean) => {
@@ -86,12 +93,48 @@ export function MoleculesPanel() {
             </Tooltip>
           </Space>
         </Checkbox>
-        <Space />
+        <Space>
+          {selectedIds.length >= 2 && (
+            <Button icon={<SwapOutlined />} onClick={() => setCompareOpen(true)}>
+              Compare {selectedIds.length} selected
+            </Button>
+          )}
+          <Segmented value={view} onChange={(v) => setView(v as 'table' | 'grid')} options={[{ label: 'Table', value: 'table' }, { label: 'Grid', value: 'grid' }]} />
+        </Space>
       </Flex>
 
-      <MoleculeTable data={molecules} loading={loading} />
+      {view === 'table' ? (
+        <MoleculeTable
+          data={molecules}
+          loading={loading}
+          selectedIds={selectedIds}
+          onSelectionChange={setSelectedIds}
+          maxSelectable={MAX_COMPARE}
+        />
+      ) : (
+        <MoleculeGrid data={molecules} loading={loading} />
+      )}
 
       <BatchImportSection onImported={() => load(druglikeOnly)} />
+
+      <Modal
+        title="Property comparison"
+        open={compareOpen}
+        onCancel={() => setCompareOpen(false)}
+        footer={null}
+        width={480}
+      >
+        <Paragraph type="secondary">
+          Each axis is normalized to a fixed drug-like reference range (Lipinski/Veber-style
+          bounds), not to the selected molecules' own min/max — so a shape that stays inside
+          the outer ring means "within typical drug-like bounds" regardless of what else is
+          selected. Hover a vertex for its exact value.
+        </Paragraph>
+        <PropertyRadarChart
+          molecules={molecules.filter((m) => selectedIds.includes(m.id))}
+          dark={dark}
+        />
+      </Modal>
     </Card>
   );
 }

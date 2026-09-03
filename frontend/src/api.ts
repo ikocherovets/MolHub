@@ -1,4 +1,13 @@
-import type { ApiErrorBody, BatchImportResult, DruglikePrediction, Molecule, SimilarityResult } from './types';
+import type {
+  ApiErrorBody,
+  BatchImportResult,
+  ChemicalSpaceEmbedding,
+  DruglikePrediction,
+  KMeansResult,
+  Molecule,
+  SimilarityResult,
+  SomResult,
+} from './types';
 
 // This is a portfolio demo, not a multi-tenant app, so the key is just baked
 // in rather than exposed as something a visitor is expected to manage.
@@ -51,6 +60,18 @@ export function predictDruglike(smiles: string): Promise<DruglikePrediction> {
 
 export function renderMolecule(smiles: string): Promise<{ svg: string }> {
   return request<{ svg: string }>('/render', { method: 'POST', body: JSON.stringify({ smiles }) });
+}
+
+export function getChemicalSpaceEmbedding(): Promise<ChemicalSpaceEmbedding> {
+  return request<ChemicalSpaceEmbedding>('/molecules/space');
+}
+
+export function getKMeansClusters(k: number): Promise<KMeansResult> {
+  return request<KMeansResult>(`/molecules/cluster/kmeans?k=${k}`);
+}
+
+export function getSomGrid(): Promise<SomResult> {
+  return request<SomResult>('/molecules/cluster/som');
 }
 
 export async function importMolecules(file: File, format: 'sdf' | 'csv'): Promise<BatchImportResult> {

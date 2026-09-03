@@ -33,6 +33,24 @@ export class MoleculesController {
     );
   }
 
+  @Get('space')
+  @ApiOperation({ summary: 'PCA projection of every stored molecule\'s fingerprint, for a structural chemical-space view' })
+  space() {
+    return this.molecules.space();
+  }
+
+  @Get('cluster/kmeans')
+  @ApiOperation({ summary: 'K-Means clustering of every stored molecule\'s fingerprint into k structurally-similar groups' })
+  kmeans(@Query('k') k?: string) {
+    return this.molecules.kmeans(k !== undefined ? Number(k) : undefined);
+  }
+
+  @Get('cluster/som')
+  @ApiOperation({ summary: 'Self-organizing map placing every stored molecule on a topology-preserving grid' })
+  som(@Query('grid') grid?: string) {
+    return this.molecules.som(grid !== undefined ? Number(grid) : undefined);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Fetch a molecule with its computed descriptors' })
   get(@Param('id') id: string) {

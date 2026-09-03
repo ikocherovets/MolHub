@@ -40,3 +40,41 @@ export interface BatchImportResult {
   failed: number;
   rows: BatchRowResult[];
 }
+
+export interface SpacePoint {
+  id: number;
+  ok: boolean;
+  error?: string;
+  x?: number;
+  y?: number;
+}
+
+export interface ChemicalSpaceEmbedding {
+  points: SpacePoint[];
+  explained_variance: number[];
+}
+
+export interface ClusterPoint {
+  id: number;
+  ok: boolean;
+  error?: string;
+  cluster?: number;
+}
+
+export interface KMeansResult {
+  points: ClusterPoint[];
+  k: number;
+}
+
+export interface SomGridPoint {
+  id: number;
+  ok: boolean;
+  error?: string;
+  x?: number;
+  y?: number;
+}
+
+export interface SomResult {
+  points: SomGridPoint[];
+  grid_size: number;
+}

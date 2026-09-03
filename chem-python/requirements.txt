@@ -3,3 +3,4 @@ uvicorn[standard]==0.30.6
 rdkit==2024.3.5
 scikit-learn==1.5.2
 python-multipart==0.0.12
+minisom==2.3.3

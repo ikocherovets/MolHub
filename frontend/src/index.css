@@ -1,4 +1,32 @@
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Example-value pills ("Try: Aspirin, Caffeine, ..."). Flat outline instead
+   of AntD's default filled gray Tag — reads as a calm, clickable suggestion
+   rather than a status label. */
+.mh-chip {
+  cursor: pointer;
+  border-radius: 999px !important;
+  border: 1px solid var(--mh-border) !important;
+  background: transparent !important;
+  color: var(--mh-text-secondary) !important;
+  padding: 2px 12px !important;
+  transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease;
+}
+.mh-chip:hover {
+  border-color: var(--mh-primary) !important;
+  color: var(--mh-primary) !important;
+  background: var(--mh-surface-subtle) !important;
+}
+
+/* Dashboard stat tiles — gives the Statistic row its own boxed surface so it
+   reads as a dashboard strip rather than bare numbers floating on the card. */
+.mh-stat-box {
+  background: var(--mh-surface-subtle);
+  border: 1px solid var(--mh-border);
+  border-radius: 10px;
+  padding: 12px 20px;
 }

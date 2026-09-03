@@ -124,6 +124,112 @@ type BatchAnalyzeResult struct {
 	Rows  []BatchRow `json:"rows"`
 }
 
+// EmbedPoint mirrors chem-python's EmbedPoint — X/Y are nil for a row whose
+// SMILES didn't parse.
+type EmbedPoint struct {
+	Row   int      `json:"row"`
+	OK    bool     `json:"ok"`
+	Error string   `json:"error,omitempty"`
+	X     *float64 `json:"x,omitempty"`
+	Y     *float64 `json:"y,omitempty"`
+}
+
+type EmbedResult struct {
+	Points            []EmbedPoint `json:"points"`
+	ExplainedVariance []float64    `json:"explained_variance"`
+}
+
+// postJSON POSTs a JSON-encoded body to a chem-python endpoint and decodes
+// the response into out — the shared plumbing behind Embed/KMeans/SOM, which
+// each send a different request shape but handle transport errors the same way.
+func (c *Client) postJSON(path string, body any, out any) error {
+	encoded, err := json.Marshal(body)
+	if err != nil {
+		return err
+	}
+
+	resp, err := c.http.Post(c.baseURL+path, "application/json", bytes.NewReader(encoded))
+	if err != nil {
+		return fmt.Errorf("calling chem-python: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("chem-python returned status %d", resp.StatusCode)
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(out); err != nil {
+		return fmt.Errorf("decoding chem-python response: %w", err)
+	}
+	return nil
+}
+
+// Embed calls chem-python's POST /embed to project each SMILES's Morgan
+// fingerprint down to 2D via PCA, in the same order as the input.
+func (c *Client) Embed(smiles []string) (*EmbedResult, error) {
+	var result EmbedResult
+	if err := c.postJSON("/embed", map[string][]string{"smiles": smiles}, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+// ClusterPoint mirrors chem-python's ClusterPoint — Cluster is nil for a row
+// whose SMILES didn't parse.
+type ClusterPoint struct {
+	Row     int    `json:"row"`
+	OK      bool   `json:"ok"`
+	Error   string `json:"error,omitempty"`
+	Cluster *int   `json:"cluster,omitempty"`
+}
+
+type KMeansResult struct {
+	Points []ClusterPoint `json:"points"`
+	K      int            `json:"k"`
+}
+
+// KMeans calls chem-python's POST /cluster/kmeans to partition every SMILES's
+// Morgan fingerprint into k structurally-similar groups.
+func (c *Client) KMeans(smiles []string, k int) (*KMeansResult, error) {
+	var result KMeansResult
+	body := map[string]any{"smiles": smiles, "k": k}
+	if err := c.postJSON("/cluster/kmeans", body, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+// SomPoint mirrors chem-python's SomPoint — X/Y are the molecule's best
+// matching unit on the grid, nil for a row whose SMILES didn't parse.
+type SomPoint struct {
+	Row   int    `json:"row"`
+	OK    bool   `json:"ok"`
+	Error string `json:"error,omitempty"`
+	X     *int   `json:"x,omitempty"`
+	Y     *int   `json:"y,omitempty"`
+}
+
+type SomResult struct {
+	Points   []SomPoint `json:"points"`
+	GridSize int        `json:"grid_size"`
+}
+
+// SOM calls chem-python's POST /cluster/som to place every SMILES's Morgan
+// fingerprint on a self-organizing map — a topology-preserving grid layout,
+// unlike KMeans's flat cluster labels. gridSize <= 0 lets chem-python pick a
+// size from the molecule count.
+func (c *Client) SOM(smiles []string, gridSize int) (*SomResult, error) {
+	var result SomResult
+	body := map[string]any{"smiles": smiles}
+	if gridSize > 0 {
+		body["grid_size"] = gridSize
+	}
+	if err := c.postJSON("/cluster/som", body, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
 // BatchAnalyze uploads a file (SDF or CSV/SMILES-per-line) to chem-python's
 // POST /batch/analyze for parsing + descriptor calculation — parsing only,
 // no storage.

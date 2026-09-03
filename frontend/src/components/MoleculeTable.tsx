@@ -60,6 +60,9 @@ interface MoleculeTableProps {
   data: Molecule[];
   loading?: boolean;
   showSimilarity?: false;
+  selectedIds?: string[];
+  onSelectionChange?: (ids: string[]) => void;
+  maxSelectable?: number;
 }
 
 interface SimilarityTableProps {
@@ -68,20 +71,23 @@ interface SimilarityTableProps {
   showSimilarity: true;
 }
 
-export function MoleculeTable({ data, loading, showSimilarity }: MoleculeTableProps | SimilarityTableProps) {
-  if (showSimilarity) {
+export function MoleculeTable(props: MoleculeTableProps | SimilarityTableProps) {
+  if (props.showSimilarity) {
     return (
       <Table<SimilarityResult>
         rowKey="id"
         size="small"
-        loading={loading}
+        loading={props.loading}
         columns={[...baseColumns<SimilarityResult>(), similarityColumn]}
-        dataSource={data}
+        dataSource={props.data}
         pagination={{ pageSize: 10, hideOnSinglePage: true }}
         scroll={{ x: true }}
       />
     );
   }
+
+  const { data, loading, selectedIds, onSelectionChange, maxSelectable } = props;
+
   return (
     <Table<Molecule>
       rowKey="id"
@@ -91,6 +97,17 @@ export function MoleculeTable({ data, loading, showSimilarity }: MoleculeTablePr
       dataSource={data}
       pagination={{ pageSize: 10, hideOnSinglePage: true }}
       scroll={{ x: true }}
+      rowSelection={
+        onSelectionChange
+          ? {
+              selectedRowKeys: selectedIds,
+              onChange: (keys) => onSelectionChange(keys as string[]),
+              getCheckboxProps: (record) => ({
+                disabled: !!maxSelectable && !selectedIds?.includes(record.id) && (selectedIds?.length ?? 0) >= maxSelectable,
+              }),
+            }
+          : undefined
+      }
     />
   );
 }

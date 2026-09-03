@@ -27,6 +27,20 @@ export class MoleculesService {
     return this.forward(() => this.http.get(`${this.baseUrl}/molecules/${id}`));
   }
 
+  async space() {
+    return this.forward(() => this.http.get(`${this.baseUrl}/molecules/space`));
+  }
+
+  async kmeans(k?: number) {
+    const query = k !== undefined ? `?k=${k}` : '';
+    return this.forward(() => this.http.get(`${this.baseUrl}/molecules/cluster/kmeans${query}`));
+  }
+
+  async som(gridSize?: number) {
+    const query = gridSize !== undefined ? `?grid=${gridSize}` : '';
+    return this.forward(() => this.http.get(`${this.baseUrl}/molecules/cluster/som${query}`));
+  }
+
   private async forward<T>(call: () => ReturnType<HttpService['request']>) {
     try {
       const response = await firstValueFrom(call());
